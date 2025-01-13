@@ -8,9 +8,17 @@ use Illuminate\Http\Request;
 class LessonClassController extends Controller
 {
     // Display a list of lesson classes
-    public function index()
+    public function index(Request $request)
     {
-        $lessonClasses = LessonClass::orderBy('id', 'desc')->paginate(5);
+        $query = $request->input('query');
+
+        $lessonClasses = LessonClass::when($query, function ($q) use ($query) {
+            $q->where('title', 'like', '%' . $query . '%')
+                ->orWhere('description', 'like', '%' . $query . '%');
+        })
+            ->orderBy('id', 'desc')
+            ->paginate(5);
+
         return response()->json($lessonClasses);
     }
 
